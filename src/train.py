@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Malconv-keras classifier training'
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--verbose', type=int, default=1)
 parser.add_argument('--epochs', type=int, default=100)
-parser.add_argument('--limit', type=float, default=0., help="limit gpy memory percentage")
+parser.add_argument('--limit', type=float, default=0., help="limit gpu memory percentage")
 parser.add_argument('--max_len', type=int, default=200000, help="model input legnth")
 parser.add_argument('--win_size', type=int, default=500)
 parser.add_argument('--val_size', type=float, default=0.1, help="validation percentage")

@@ -30,15 +30,17 @@ def preprocess(fn_list, max_len):
 
 
 if __name__ == '__main__':
+    '''Set the max input file length, input file type and output file (.pkl) location'''
     args = parser.parse_args()
         
     df = pd.read_csv(args.csv, header=None)
     fn_list = df[0].values
     
     print('Preprocessing ...... this may take a while ...')
-    st = time.time()
+    start_time = time.time()
+    '''What is the use of [0]'''
     processed_data = preprocess(fn_list, args.max_len)[0]
-    print('Finished ...... %d sec' % int(time.time()-st))
+    print('Finished ...... %d sec' % int(time.time()-start_time))
     
     with open(args.save_path, 'wb') as f:
         pickle.dump(processed_data, f)
