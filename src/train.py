@@ -5,10 +5,12 @@ import warnings
 import pandas as pd
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.models import load_model
-
+from sklearn import metrics
 import utils
 from malconv import Malconv
 from preprocess import preprocess
+from predict import predict
+import numpy as np
 
 warnings.filterwarnings("ignore")
 
@@ -21,7 +23,7 @@ parser.add_argument('--max_len', type=int, default=200000, help="model input leg
 parser.add_argument('--win_size', type=int, default=500)
 parser.add_argument('--val_size', type=float, default=0.1, help="validation percentage")
 parser.add_argument('--save_path', type=str, default='../saved/', help='Directory to save model and log')
-parser.add_argument('--model_path', type=str, default='../saved/malconv.h5', help="model to resume")
+parser.add_argument('--model_path', type=str, default='../saved/model.h5', help="model to resume")
 parser.add_argument('--save_best', action='store_true', help="Save model with best validation accuracy")
 parser.add_argument('--resume', action='store_true')
 parser.add_argument('csv', type=str)
@@ -31,8 +33,8 @@ parser.add_argument('csv', type=str)
 def train(model, max_len=200000, batch_size=64, verbose=True, epochs=100, save_path='../saved/', save_best=True):
     
     # callbacks
-    ear = EarlyStopping(monitor='val_acc', patience=5)
-    mcp = ModelCheckpoint(join(save_path, 'malconv.h5'), 
+    ear = EarlyStopping(monitor='val_acc', patience=10)
+    mcp = ModelCheckpoint(join(save_path, 'model.h5'), 
                           monitor="val_acc", 
                           save_best_only=save_best, 
                           save_weights_only=False)
@@ -74,4 +76,17 @@ if __name__ == '__main__':
     history = train(model, args.max_len, args.batch_size, args.verbose, args.epochs, args.save_path, args.save_best)
     with open(join(args.save_path, 'history.pkl'), 'wb') as f:
         pickle.dump(history.history, f)
-
+    
+    df1 = pd.read_csv('/home/aduraira/scripts/out/auc_test.csv',header=None)
+    X,Y = df1[0],df1[1]
+    pred = predict(model,X, np.zeros((Y.shape)), args.batch_size, args.verbose)
+    auc = metrics.roc_auc_score(Y,pred)
+    print("ROC AUC Score     : ", auc)
+    acc = metrics.accuracy_score(Y,pred>0.7)
+    print("Accuracy          : ", acc)
+    bacc = metrics.balanced_accuracy_score(Y,pred>0.7)
+    print("Balanced Accuracy : ", bacc)
+    cm = metrics.confusion_matrix(Y,pred>0.7)
+    print("Confusion Matrix  : ", cm)
+    roc = metrics.roc_curve(Y,pred>0.7)
+    print("ROC Curve         : ", roc)
