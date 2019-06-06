@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from keras.models import load_model
 
+from sklearn import metrics
 import utils
 from preprocess import preprocess
 
@@ -10,7 +11,7 @@ parser = argparse.ArgumentParser(description='Malconv-keras classifier')
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--verbose', type=int, default=1)
 parser.add_argument('--limit', type=float, default=0.)
-parser.add_argument('--model_path', type=str, default='../saved/malconv.h5')
+parser.add_argument('--model_path', type=str, default='../saved/model.h5')
 parser.add_argument('--result_path', type=str, default='../saved/result.csv')
 parser.add_argument('csv', type=str)
 
@@ -38,6 +39,7 @@ if __name__ == '__main__':
     df = pd.read_csv(args.csv, header=None)
     fn_list = df[0].values
     label = np.zeros((fn_list.shape))
+    actual = df[1]
     
     pred = predict(model, fn_list, label, args.batch_size, args.verbose)
     df['predict score'] = pred
@@ -45,3 +47,5 @@ if __name__ == '__main__':
     df.to_csv(args.result_path, header=None, index=False)
     print('Results writen in', args.result_path)
 
+    auc = metrics.roc_auc_score(actual, pred)
+    print("AUC SCORE : ", auc)
